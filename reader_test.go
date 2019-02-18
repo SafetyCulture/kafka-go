@@ -53,7 +53,7 @@ func TestReader(t *testing.T) {
 			function: testReaderStats,
 		},
 
-		{ // https://github.com/segmentio/kafka-go/issues/30
+		{ // https://github.com/SafetyCulture/kafka-go/issues/30
 			scenario: "reading from an out-of-range offset waits until the context is cancelled",
 			function: testReaderOutOfRangeGetsCanceled,
 		},
