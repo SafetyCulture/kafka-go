@@ -6,7 +6,7 @@ import (
 	"io/ioutil"
 	"sync"
 
-	"github.com/segmentio/kafka-go"
+	"github.com/SafetyCulture/kafka-go"
 )
 
 var (

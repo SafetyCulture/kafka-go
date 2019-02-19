@@ -5,7 +5,7 @@ import (
 	"encoding/binary"
 
 	"github.com/golang/snappy"
-	"github.com/segmentio/kafka-go"
+	"github.com/SafetyCulture/kafka-go"
 )
 
 func init() {
