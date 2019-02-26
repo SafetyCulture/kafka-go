@@ -254,7 +254,7 @@ func (r *Reader) assignTopicPartitions(conn partitionReader, group joinGroupResp
 	topics := extractTopics(members)
 	partitions, err := conn.ReadPartitions(topics...)
 	if err != nil {
-		return nil, fmt.Errorf("unable to read partitions: %v", err)
+		return nil, err
 	}
 
 	r.withLogger(func(l *log.Logger) {
@@ -435,8 +435,7 @@ func (r *Reader) syncGroup(conn *Conn, memberAssignments GroupMemberAssignments)
 	}
 
 	if len(assignments.Topics) == 0 {
-		generation, memberID := r.membership()
-		return nil, fmt.Errorf("received empty assignments for group, %v as member %s for generation %d", r.config.GroupID, memberID, generation)
+		return nil, UnknownTopicOrPartition
 	}
 
 	r.withLogger(func(l *log.Logger) {
@@ -830,7 +829,7 @@ func (r *Reader) handshake() error {
 	// rebalance and fetch assignments
 	assignments, err := r.rebalance(conn)
 	if err != nil {
-		return fmt.Errorf("rebalance failed for consumer group, %v: %v", r.config.GroupID, err)
+		return err
 	}
 
 	rg := &runGroup{}
@@ -865,8 +864,20 @@ func (r *Reader) run() {
 		l.Printf("entering loop for consumer group, %v\n", r.config.GroupID)
 	})
 
+	attempt := 0
+	sleepSecs := time.Second
+
 	for {
+		if attempt >= 5 {
+			log.Fatal("Cannot find topic or partition")
+		}
+
 		if err := r.handshake(); err != nil {
+			if err == UnknownTopicOrPartition {
+				attempt++
+				sleepSecs *= 2
+			}
+
 			r.withErrorLogger(func(l *log.Logger) {
 				l.Println(err)
 			})
@@ -877,6 +888,8 @@ func (r *Reader) run() {
 			return
 		default:
 		}
+
+		time.Sleep(sleepSecs)
 	}
 }
 
