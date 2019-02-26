@@ -869,7 +869,7 @@ func (r *Reader) run() {
 
 	for {
 		if attempt >= 5 {
-			log.Fatal("Cannot find topic or partition")
+			panic(fmt.Sprintf("unknown topic %v or partition %v", r.config.Topic, r.config.Partition))
 		}
 
 		if err := r.handshake(); err != nil {
