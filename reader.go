@@ -864,17 +864,17 @@ func (r *Reader) run() {
 		l.Printf("entering loop for consumer group, %v\n", r.config.GroupID)
 	})
 
-	attempt := 0
+	unknownTopicPartitionErrCount := 0
 	sleepSecs := time.Second
 
 	for {
-		if attempt >= 5 {
+		if unknownTopicPartitionErrCount >= 5 {
 			panic(fmt.Sprintf("unknown topic %v or partition %v", r.config.Topic, r.config.Partition))
 		}
 
 		if err := r.handshake(); err != nil {
 			if err == UnknownTopicOrPartition {
-				attempt++
+				unknownTopicPartitionErrCount++
 				sleepSecs *= 2
 			}
 
