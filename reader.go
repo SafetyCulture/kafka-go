@@ -873,6 +873,9 @@ func (r *Reader) run() {
 		}
 
 		if err := r.handshake(); err != nil {
+			// This error happens when:
+			// 1. The topic doesn't exist, `joinGroup` throws this error
+			// 2. More consumers are started than the number of partitions, `syncGroup` throws this error
 			if err == UnknownTopicOrPartition {
 				unknownTopicPartitionErrCount++
 				sleepSecs *= 2
